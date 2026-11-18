@@ -19,12 +19,14 @@ This command performs the following workflow:
 ## Files to carry from downstream
 
 The following OpenShift-specific files/directories should be carried over from downstream/main:
-- `.ci-operator.yaml` - OpenShift CI operator configuration
+- `.ci-operator.yaml` - OpenShift CI operator configuration (only present while the Prow build root is still resolved from the repository)
 - `.snyk` - Snyk security scanning configuration
 - `.tekton/` - Tekton pipeline definitions (entire directory)
 - `Dockerfile.ocp` - OpenShift-specific Dockerfile
 - `Dockerfile.ci` - CI-specific Dockerfile
+- `Dockerfile.ci-build-root` - Prow build root image (build_root.project_image)
 - `Makefile-ocp.mk` - OpenShift-specific Makefile
+- `hack/verify-golang-versions.sh` - Go version consistency check for CI build images
 - `renovate.json` - Renovate configuration
 - `.gitignore` - OpenShift-specific ignore patterns (removes vendor from ignore)
 - `OWNERS` - OpenShift-specific ownership
@@ -75,7 +77,9 @@ Now perform the downstream sync workflow step by step:
    - Try `git checkout downstream/main -- .tekton/` (if error, skip and note)
    - Try `git checkout downstream/main -- Dockerfile.ocp` (if error, skip and note)
    - Try `git checkout downstream/main -- Dockerfile.ci` (if error, skip and note)
+   - Try `git checkout downstream/main -- Dockerfile.ci-build-root` (if error, skip and note)
    - Try `git checkout downstream/main -- Makefile-ocp.mk` (if error, skip and note)
+   - Try `git checkout downstream/main -- hack/verify-golang-versions.sh` (if error, skip and note)
    - Try `git checkout downstream/main -- renovate.json` (if error, skip and note)
    - Try `git checkout downstream/main -- .gitignore` (if error, skip and note)
    - Try `git checkout downstream/main -- OWNERS` (if error, skip and note)

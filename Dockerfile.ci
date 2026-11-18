@@ -1,14 +1,18 @@
 # Build the manager binary
-ARG BUILDER_IMAGE=registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.27-openshift-5.2 AS builder
+# The builder stage uses the publicly available UBI9 Go toolset image, which
+# ships Go together with make, gcc and git. USER 0 is set for the build stage
+# because go-toolset defaults to user 1001 and the /go layout it provides is
+# not guaranteed to be writable.
 ARG BASE_IMAGE=registry.ci.openshift.org/ocp/5.2:base-rhel9
 
 # Build the manager binary
-FROM ${BUILDER_IMAGE} AS builder
+FROM registry.access.redhat.com/ubi9/go-toolset:1.27 AS builder
+USER 0
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETPLATFORM
 
-WORKDIR /workspace
+WORKDIR /go/src/github.com/openshift/jobset-operator
 COPY . .
 
 ENV GOEXPERIMENT=strictfipsruntime
@@ -18,9 +22,9 @@ RUN make -f Makefile-ocp.mk build-ocp GO_BUILD_ENV='CGO_ENABLED=1 GOOS=${TARGETO
 
 FROM --platform=$TARGETPLATFORM ${BASE_IMAGE}
 WORKDIR /
-COPY --from=builder /workspace/bin/manager .
+COPY --from=builder /go/src/github.com/openshift/jobset-operator/bin/manager .
 RUN mkdir /licenses
-COPY --from=builder /workspace/LICENSE /licenses/.
+COPY --from=builder /go/src/github.com/openshift/jobset-operator/LICENSE /licenses/.
 USER 65532:65532
 
 LABEL com.redhat.component="Job Set"
